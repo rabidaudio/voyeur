@@ -1,11 +1,14 @@
 {
-  "name": "Media Gallery Sample",
-  "version": "0.2.2",
+  "name": "Voyeur - image manager",
+  "version": "0.0.1",
   "manifest_version": 2,
-  "description": "Used to test Media Gallery API",
-  "permissions": [{
-      "mediaGalleries": ["read", "allAutoDetected"] 
-  }],
+  "description": "A image viewer using curiosadb.com",
+  "permissions": [
+    {
+        "mediaGalleries": ["read", "allAutoDetected"]
+    },
+    "fullscreen"
+  ],
   "icons": {
     "128": "mga-128color.png"
   },

@@ -20,3 +20,8 @@ chrome.app.runtime.onRestarted.addListener(function() {
     );
     console.log("app restarted");
 });
+
+
+chrome.runtime.onSuspend.addListener(function() {
+  // Do some simple clean-up tasks.
+});

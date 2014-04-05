@@ -5,8 +5,26 @@ var gGalleryArray = [];    // holds information about all top-level Galleries fo
 var gGalleryData = [];     // hold computed information about each Gallery
 var gCurOptGrp = null;
 var imgFormats = ['png', 'bmp', 'jpeg', 'jpg', 'gif', 'png', 'svg', 'xbm', 'webp'];
-var audFormats = ['wav', 'mp3'];
-var vidFormats = ['3gp', '3gpp', 'avi', 'flv', 'mov', 'mpeg', 'mpeg4', 'mp4', 'ogg', 'webm', 'wmv'];
+var audFormats = []; //['wav', 'mp3'];
+var vidFormats = []; //['3gp', '3gpp', 'avi', 'flv', 'mov', 'mpeg', 'mpeg4', 'mp4', 'ogg', 'webm', 'wmv'];
+
+
+ $.fn.extend({
+     onKeyEnter: function(callback){
+         var cb = (typeof callback == 'function') ? callback : new Function(callback);
+         this.keypress(function(e){ if( e.keyCode == 13 ) setTimeout(cb,0,e); });
+     },
+     onKey: function(key, callback){ //TODO normalize keydown/keyup and keypress, so detection of correct method is automatic
+         var cb = (typeof callback == 'function') ? callback : new Function(callback);
+         this.keypress(function(e){ if( e.keyCode == key ) setTimeout(cb,0,e); });
+     },
+     onKeyF12: function(callback){
+         var cb = (typeof callback == 'function') ? callback : new Function(callback);
+         console.log("f12 press check");
+         this.keypress(function(e){ if( e.keyCode == 123 ) setTimeout(cb,0,e); });
+     },
+ }); 
+
 
 function errorPrintFactory(custom) {
    return function(e) {
@@ -38,11 +56,11 @@ function errorPrintFactory(custom) {
 }
 
 function GalleryData(id) {
-   this._id = id;
-   this.path = "";
+   this._id       = id;
+   this.path      = "";
    this.sizeBytes = 0;
-   this.numFiles = 0;
-   this.numDirs = 0;
+   this.numFiles  = 0;
+   this.numDirs   = 0;
 }
 
 function addImageToContentDiv() {
@@ -52,30 +70,30 @@ function addImageToContentDiv() {
    return image;
 }
 
-function addAudioToContentDiv() {
+/*function addAudioToContentDiv() {
    var content_div = document.getElementById('content');
    var audio = document.createElement('audio');
    audio.setAttribute("controls","controls");
    content_div.appendChild(audio);
    return audio;
-}
+}*/
 
-function addVideoToContentDiv() {
+/*function addVideoToContentDiv() {
    var content_div = document.getElementById('content');
    var audio = document.createElement('video');
    audio.setAttribute("controls","controls");
    content_div.appendChild(audio);
    return audio;
-}
+}*/
 
 function getFileType(filename) {
    var ext = filename.substr(filename.lastIndexOf('.') + 1).toLowerCase();
    if (imgFormats.indexOf(ext) >= 0)
       return "image";
-   else if (audFormats.indexOf(ext) >= 0)
-      return "audio";
-   else if (vidFormats.indexOf(ext) >= 0)
-      return "video";
+   // else if (audFormats.indexOf(ext) >= 0)
+   //    return "audio";
+   // else if (vidFormats.indexOf(ext) >= 0)
+   //    return "video";
    else return null;
 }
 
@@ -113,10 +131,10 @@ function updateSelection(e) {
          var type = getFileType(path);
          if (type == "image")
             newElem = addImageToContentDiv();
-         else if (type == "audio")
-            newElem = addAudioToContentDiv();
-         else if (type == "video")
-            newElem = addVideoToContentDiv();
+         // else if (type == "audio")
+         //    newElem = addAudioToContentDiv();
+         // else if (type == "video")
+         //    newElem = addVideoToContentDiv();
 
          if (newElem) {
             (function(image_element) {
@@ -233,9 +251,8 @@ function getGalleriesInfo(results) {
    }
 }
 
-window.addEventListener("load", function() {
-   // __MGA__bRestart is set in the launcher code to indicate that the app was
-   // restarted instead of being normally launched
+
+$(document).ready(function(){
    if (window.__MGA__bRestart) {
       console.log("App was restarted");
       // if the app was restarted, get the media gallery information
@@ -244,28 +261,76 @@ window.addEventListener("load", function() {
       }, getGalleriesInfo);
    }
 
-   document.getElementById('gallery-button').addEventListener("click", function() {
+   $('#gallery-button').click(function() {
       chrome.mediaGalleries.getMediaFileSystems({
          interactive : 'if_needed'
       }, getGalleriesInfo);
    });
-   document.getElementById('configure-button').addEventListener("click", function() {
+
+   $('#configure-button').click(function() {
       chrome.mediaGalleries.getMediaFileSystems({
          interactive : 'yes'
       }, getGalleriesInfo);
    });
-   document.getElementById('add-folder-button').addEventListener("click", function() {
+
+   $('#add-folder-button').click(function() {
       chrome.mediaGalleries.addUserSelectedFolder(getGalleriesInfo);
    });
-   document.getElementById('scan-button').addEventListener("click", function () {
+
+   $('#scan-button').click(function () {
       clearContentDiv();
       clearList();
       if (gGalleryArray.length > 0) {
          scanGalleries(gGalleryArray[0]);
       }
    });
-   document.getElementById('GalleryList').addEventListener("change", function(e) {
+
+   $('#GalleryList').change(function(e) {
       updateSelection(e);
+   });
+
+   $('#content').click(function(){
+      this.webkitRequestFullscreen();
    });
 });
 
+// window.addEventListener("load", function() {
+//    // __MGA__bRestart is set in the launcher code to indicate that the app was
+//    // restarted instead of being normally launched
+//    if (window.__MGA__bRestart) {
+//       console.log("App was restarted");
+//       // if the app was restarted, get the media gallery information
+//       chrome.mediaGalleries.getMediaFileSystems({
+//          interactive : 'if_needed'
+//       }, getGalleriesInfo);
+//    }
+
+//    document.getElementById('gallery-button').addEventListener("click", function() {
+//       chrome.mediaGalleries.getMediaFileSystems({
+//          interactive : 'if_needed'
+//       }, getGalleriesInfo);
+//    });
+//    document.getElementById('configure-button').addEventListener("click", function() {
+//       chrome.mediaGalleries.getMediaFileSystems({
+//          interactive : 'yes'
+//       }, getGalleriesInfo);
+//    });
+//    document.getElementById('add-folder-button').addEventListener("click", function() {
+//       chrome.mediaGalleries.addUserSelectedFolder(getGalleriesInfo);
+//    });
+//    document.getElementById('scan-button').addEventListener("click", function () {
+//       clearContentDiv();
+//       clearList();
+//       if (gGalleryArray.length > 0) {
+//          scanGalleries(gGalleryArray[0]);
+//       }
+//    });
+//    document.getElementById('GalleryList').addEventListener("change", function(e) {
+//       updateSelection(e);
+//    });
+
+//    /*$(document.body).onKeyF12(function(e){
+//       document.getElementById('content').webkitRequestFullscreen();
+//    });*/
+//    console.log("okay!");
+// });

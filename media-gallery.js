@@ -4,26 +4,28 @@ var gDirectories = [];     // used to process subdirectories
 var gGalleryArray = [];    // holds information about all top-level Galleries found - list of DomFileSystem
 var gGalleryData = [];     // hold computed information about each Gallery
 var gCurOptGrp = null;
-var imgFormats = ['png', 'bmp', 'jpeg', 'jpg', 'gif', 'png', 'svg', 'xbm', 'webp'];
-var audFormats = []; //['wav', 'mp3'];
-var vidFormats = []; //['3gp', '3gpp', 'avi', 'flv', 'mov', 'mpeg', 'mpeg4', 'mp4', 'ogg', 'webm', 'wmv'];
+
+var fullscreen = false;
 
 
- $.fn.extend({
-     onKeyEnter: function(callback){
-         var cb = (typeof callback == 'function') ? callback : new Function(callback);
-         this.keypress(function(e){ if( e.keyCode == 13 ) setTimeout(cb,0,e); });
-     },
-     onKey: function(key, callback){ //TODO normalize keydown/keyup and keypress, so detection of correct method is automatic
-         var cb = (typeof callback == 'function') ? callback : new Function(callback);
-         this.keypress(function(e){ if( e.keyCode == key ) setTimeout(cb,0,e); });
-     },
-     onKeyF12: function(callback){
-         var cb = (typeof callback == 'function') ? callback : new Function(callback);
-         console.log("f12 press check");
-         this.keypress(function(e){ if( e.keyCode == 123 ) setTimeout(cb,0,e); });
-     },
- }); 
+$.fn.extend({
+   onKeyEnter: function(callback){
+      var cb = (typeof callback == 'function') ? callback : new Function(callback);
+      this.keypress(function(e){ if( e.keyCode == 13 ) setTimeout(cb,0,e); });
+   },
+   onKey: function(key, callback){ //TODO normalize keydown/keyup and keypress, so detection of correct method is automatic
+      var cb = (typeof callback == 'function') ? callback : new Function(callback);
+      this.keypress(function(e){ if( e.keyCode == key ) setTimeout(cb,0,e); });
+   },
+   onKeyF11: function(callback){
+      var cb = (typeof callback == 'function') ? callback : new Function(callback);
+      this.keydown(function(e){ console.log(e); if( e.keyCode == 122 ) setTimeout(cb,0,e); });
+   },
+   onKeyEsc: function(callback){
+      var cb = (typeof callback == 'function') ? callback : new Function(callback);
+      this.keydown(function(e){ if( e.keyCode == 27 ) setTimeout(cb,0,e); });
+   }
+}); 
 
 
 function errorPrintFactory(custom) {
@@ -86,15 +88,19 @@ function addImageToContentDiv() {
    return audio;
 }*/
 
+
+
 function getFileType(filename) {
    var ext = filename.substr(filename.lastIndexOf('.') + 1).toLowerCase();
-   if (imgFormats.indexOf(ext) >= 0)
+   if (imgFormats.indexOf(ext) >= 0){
       return "image";
+   }else{
    // else if (audFormats.indexOf(ext) >= 0)
    //    return "audio";
    // else if (vidFormats.indexOf(ext) >= 0)
    //    return "video";
-   else return null;
+      return null;
+   }
 }
 
 function clearContentDiv() {
@@ -251,6 +257,27 @@ function getGalleriesInfo(results) {
    }
 }
 
+function fullscreenOn(){
+      if(!fullscreen){
+         $('#content')[0].webkitRequestFullscreen();
+         $('#content').removeClass('nofullscreen').addClass('fullscreen');
+         fullscreen = !fullscreen;
+      }
+
+}
+
+function fullscreenOff(){
+      if(fullscreen){
+         document.webkitCancelFullScreen();
+         $('#content').removeClass('fullscreen').addClass('nofullscreen');
+         // $('#content')[0].webkitCancelFullscreen();
+         fullscreen = !fullscreen;
+      }
+}
+
+
+
+
 
 $(document).ready(function(){
    if (window.__MGA__bRestart) {
@@ -289,48 +316,25 @@ $(document).ready(function(){
       updateSelection(e);
    });
 
-   $('#content').click(function(){
-      this.webkitRequestFullscreen();
+   $(document.body).onKeyF11(function(){
+      if(fullscreen) fullscreenOff(); else fullscreenOn();
    });
+
+   $(document.body).onKeyEsc(function(){
+      fullscreenOff();
+   });
+
+   $(document.body).onKey(37, function(){
+      if(fullscreen){
+
+      }
+   });
+   $(document.body).onKey(39, function(){
+      if(fullscreen){
+
+      }
+   });
+
+   setTimeout(function(){$('#gallery-button').click();}, 0);
+   setTimeout(function(){$('#scan-button').click();}, 500);
 });
-
-// window.addEventListener("load", function() {
-//    // __MGA__bRestart is set in the launcher code to indicate that the app was
-//    // restarted instead of being normally launched
-//    if (window.__MGA__bRestart) {
-//       console.log("App was restarted");
-//       // if the app was restarted, get the media gallery information
-//       chrome.mediaGalleries.getMediaFileSystems({
-//          interactive : 'if_needed'
-//       }, getGalleriesInfo);
-//    }
-
-//    document.getElementById('gallery-button').addEventListener("click", function() {
-//       chrome.mediaGalleries.getMediaFileSystems({
-//          interactive : 'if_needed'
-//       }, getGalleriesInfo);
-//    });
-//    document.getElementById('configure-button').addEventListener("click", function() {
-//       chrome.mediaGalleries.getMediaFileSystems({
-//          interactive : 'yes'
-//       }, getGalleriesInfo);
-//    });
-//    document.getElementById('add-folder-button').addEventListener("click", function() {
-//       chrome.mediaGalleries.addUserSelectedFolder(getGalleriesInfo);
-//    });
-//    document.getElementById('scan-button').addEventListener("click", function () {
-//       clearContentDiv();
-//       clearList();
-//       if (gGalleryArray.length > 0) {
-//          scanGalleries(gGalleryArray[0]);
-//       }
-//    });
-//    document.getElementById('GalleryList').addEventListener("change", function(e) {
-//       updateSelection(e);
-//    });
-
-//    /*$(document.body).onKeyF12(function(e){
-//       document.getElementById('content').webkitRequestFullscreen();
-//    });*/
-//    console.log("okay!");
-// });
